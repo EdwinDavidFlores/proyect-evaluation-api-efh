@@ -101,6 +101,24 @@ def add_user(proyect_id: str, pr_usuario: Usuarios):
 
         return pr_usuario
     except exceptions.CosmosResourceNotFoundError:
-        raise HTTPException(status_code=404, detail='Evento no encotrado')
+        raise HTTPException(status_code=404, detail='Proyecto no encontrado')
+    except exceptions.CosmosHttpResponseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/proyects/{proyect_id}/users/{user_id}")
+def get_user(proyect_id: str, user_id: str):
+
+    try:
+        proy = container.read_item(item=proyect_id, partition_key=proyect_id)
+        
+        user_id = next((p for p in  proy['id_usuario'] if p['id'] == user_id), None)
+
+        if user_id:
+            return user_id
+        else:
+            raise HTTPException(status_code=404, detail='usuario no encontrado')
+    except exceptions.CosmosResourceNotFoundError:
+        raise HTTPException(status_code=404, detail='Proyecto no encontrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))

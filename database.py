@@ -7,7 +7,7 @@ COSMOS_ENDPOINT = 'https://acdbefhdev.documents.azure.com:443/'
 COSMOS_KEY = 'cQ6mI8lnjcLi9lbKWjz82E0bVICDto8UNVO9UgAUY623tOn1D7yy4lcgAiI4qwtVSrVzXhNTJo6ZACDbn5Msng=='
 
 DATABASE_NAME = 'test_db'
-CONTAINER_NAME = 'events'
+CONTAINER_NAME = 'proyects'
 
 # Inicializar el cliente de Cosmos DB
 client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
