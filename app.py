@@ -105,6 +105,7 @@ def add_user(proyect_id: str, pr_usuario: Usuarios):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+#obtener_usuario
 
 @app.get("/proyects/{proyect_id}/users/{user_id}")
 def get_user(proyect_id: str, user_id: str):
@@ -117,8 +118,81 @@ def get_user(proyect_id: str, user_id: str):
         if user_id:
             return user_id
         else:
-            raise HTTPException(status_code=404, detail='usuario no encontrado')
+            raise HTTPException(status_code=404, detail='Usuario no encontrado')
     except exceptions.CosmosResourceNotFoundError:
         raise HTTPException(status_code=404, detail='Proyecto no encontrado')
+    except exceptions.CosmosHttpResponseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+#Listar_usuario
+
+@app.get("/proyects/{proyect_id}/users/", response_model=List[Usuarios])
+def list_user(proyect_id: str):
+    
+    try:
+        proy = container.read_item(item=proyect_id, partition_key= proyect_id)
+        ## event['participants'] // event.get('parcitipants')
+        user_id = proy.get('id_usuario', [])
+
+        return user_id
+    except exceptions.CosmosResourceNotFoundError:
+        raise HTTPException(status_code=404, detail='Proyecto no encontrado')
+    except exceptions.CosmosHttpResponseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+#Actualizar_usuario
+
+@app.put("/proyects/{proyect_id}/users/{user_id}", response_model=Usuarios)
+def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
+
+    try:
+        proy = container.read_item(item=proyect_id, partition_key=proyect_id)
+        user = next((p for p in proy['id_usuario'] if p['id'] == user_id), None)
+
+        if not user:
+            raise HTTPException(status_code=404, detail= "Usuario no encontrado")
+        
+        if user['id'] != updated_user.id :
+            raise HTTPException(status_code=404, detail= "el id enviado en la peticion debe ser igual al id del body")
+
+        user.update(updated_user.dict(exclude_unset=True))
+
+        # for p in event['partivcipants']:
+
+        #     if p['id'] != participant_id:
+        #         lista_nueva.append(p)
+        #     else:
+        #         lista_nueva.append(participant)
+
+        proy['id_usuario'] = [ p if p['id'] != user_id else user for p in proy['id_usuario']]
+
+        container.replace_item(item=proyect_id, body=proy)
+
+        return user
+
+    except exceptions.CosmosResourceNotFoundError:
+        raise HTTPException(status_code=404, detail='Proyecto no encotrado')
+    except exceptions.CosmosHttpResponseError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+ #Eliminar_usuario  --Falta
+
+@app.delete("/events/{event_id}/participants/{participant_id}", status_code=204)
+def delete_participant(event_id: str, participant_id: str):
+
+    try:
+
+        event = container.read_item(item=event_id, partition_key=event_id)
+        participant = next((p for p in event['participants'] if p['id'] == participant_id), None)
+
+        if not participant:
+            raise HTTPException(status_code=404, detail='Participante no encontrado')
+        
+        event['participants'] = [ p for p in event['participants'] if p['id'] != participant_id]
+
+        container.replace_item(item=event_id, body=event)
+        return
+    except exceptions.CosmosResourceNotFoundError:
+        raise HTTPException(status_code=404, detail='Evento no encotrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
