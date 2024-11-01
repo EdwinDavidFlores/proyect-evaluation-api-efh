@@ -157,13 +157,7 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
 
         user.update(updated_user.dict(exclude_unset=True))
 
-        # for p in event['partivcipants']:
-
-        #     if p['id'] != participant_id:
-        #         lista_nueva.append(p)
-        #     else:
-        #         lista_nueva.append(participant)
-
+      
         proy['id_usuario'] = [ p if p['id'] != user_id else user for p in proy['id_usuario']]
 
         container.replace_item(item=proyect_id, body=proy)
@@ -177,22 +171,25 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
 
  #Eliminar_usuario  --Falta
 
-@app.delete("/events/{event_id}/participants/{participant_id}", status_code=204)
-def delete_participant(event_id: str, participant_id: str):
+@app.delete("/proyects/{proyect_id}/users/{user_id}", status_code=204)
+def delete_user(proyect_id: str, user_id: str):
 
     try:
 
-        event = container.read_item(item=event_id, partition_key=event_id)
-        participant = next((p for p in event['participants'] if p['id'] == participant_id), None)
+        proy = container.read_item(item=proyect_id, partition_key=proyect_id)
+        user = next((p for p in proy['id_usuario'] if p['id'] == user_id), None)
 
-        if not participant:
-            raise HTTPException(status_code=404, detail='Participante no encontrado')
+        if not user:
+            raise HTTPException(status_code=404, detail='Usuario no encontrado')
         
-        event['participants'] = [ p for p in event['participants'] if p['id'] != participant_id]
+        proy['id_usuario']  = [ p for p in proy['id_usuario'] if p['id'] != user_id]
 
-        container.replace_item(item=event_id, body=event)
+        container.replace_item(item=proyect_id, body=proy)
         return
     except exceptions.CosmosResourceNotFoundError:
-        raise HTTPException(status_code=404, detail='Evento no encotrado')
+        raise HTTPException(status_code=404, detail='Proyecto no encotrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+        #  proy['id_usuario'].append(pr_usuario.dict())
