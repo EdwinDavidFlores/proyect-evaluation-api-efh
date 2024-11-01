@@ -13,7 +13,8 @@ app = FastAPI(title='API de Gestion Proyectos')
 def home():
     return "Hola Mundo proyecto"
 
-# Crear evento
+# Crear proyecto
+
 @app.post("/proyects/", response_model=Proyectos, status_code=201)
 def create_proyect(proy: Proyectos):
     try:
@@ -24,7 +25,7 @@ def create_proyect(proy: Proyectos):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-# Obtener proyecto por id
+# Obtener proyecto
 @app.get("/proyects/{proyect_id}", response_model=Proyectos)
 def get_proyect(proyect_id: str = Path(..., description="ID del proyecto a recuperar")):
     try:
@@ -37,6 +38,7 @@ def get_proyect(proyect_id: str = Path(..., description="ID del proyecto a recup
     
 
 # Listar Proyectos
+
 @app.get("/proyects/", response_model=List[Proyectos])
 def list_proyect():
     
@@ -45,6 +47,7 @@ def list_proyect():
     return items
 
 # Actualizar Proyectos
+
 @app.put("/proyects/{proyect_id}", response_model=Proyectos)
 def update_proyect(proyect_id: str, update_proyect: Proyectos):
 
@@ -81,12 +84,14 @@ def delete_proyect(proyect_id: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-#### Endpoints de Usuarios Proyectos
+#### Endpoints de Usuarios
+
+#Crear_usuario
 
 @app.post("/proyects/{proyect_id}/users/", response_model=Usuarios, status_code=201)
 def add_user(proyect_id: str, pr_usuario: Usuarios):
 
-    # validar si el participante ya existe
+    # validar si el Usuario ya existe
 
     try:
         
@@ -105,7 +110,7 @@ def add_user(proyect_id: str, pr_usuario: Usuarios):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-#obtener_usuario
+#Obtener_usuario
 
 @app.get("/proyects/{proyect_id}/users/{user_id}")
 def get_user(proyect_id: str, user_id: str):
@@ -169,7 +174,7 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
- #Eliminar_usuario  --Falta
+ #Eliminar_usuario 
 
 @app.delete("/proyects/{proyect_id}/users/{user_id}", status_code=204)
 def delete_user(proyect_id: str, user_id: str):
@@ -190,6 +195,3 @@ def delete_user(proyect_id: str, user_id: str):
         raise HTTPException(status_code=404, detail='Proyecto no encotrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
-        #  proy['id_usuario'].append(pr_usuario.dict())
