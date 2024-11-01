@@ -5,7 +5,7 @@ from models import Proyectos, Usuarios
 from azure.cosmos import exceptions
 from datetime import datetime
 
-app = FastAPI(title='API de Gestion Proyectos')
+app = FastAPI(title='API de Gestion Proyectos y Usuarios')
 
 #### Endpoint de Proyectos
 
@@ -21,7 +21,7 @@ def create_proyect(proy: Proyectos):
         container.create_item(body=proy.dict())
         return proy
     except exceptions.CosmosResourceExistsError:
-        raise HTTPException(status_code=400, detail="El evento con este ID ya existe.")
+        raise HTTPException(status_code=400, detail="El Proyecto con este ID ya existe.")
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -32,7 +32,7 @@ def get_proyect(proyect_id: str = Path(..., description="ID del proyecto a recup
         proy = container.read_item(item=proyect_id, partition_key=proyect_id)
         return proy
     except exceptions.CosmosResourceNotFoundError:
-        raise HTTPException(status_code=404, detail="Evento no encontrado")
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -59,9 +59,6 @@ def update_proyect(proyect_id: str, update_proyect: Proyectos):
         existing_proy.update(update_proyect.dict(exclude_unset=True))
         
         print(existing_proy)
-        # Validar capacidad
-       # if existing_proy['capacity'] < len(existing_proy['usuarios']):
-       #     raise HTTPException(status_code=400, detail="La capacidad no puede ser menor que el número de participantes actuales.")
         
         container.replace_item(item=existing_proy, body=existing_proy)
         return existing_proy
@@ -79,7 +76,7 @@ def delete_proyect(proyect_id: str):
         container.delete_item(item=proyect_id, partition_key=proyect_id)
         return
     except exceptions.CosmosResourceNotFoundError:
-        raise HTTPException(status_code=404, detail='Evento no encotrado')
+        raise HTTPException(status_code=404, detail='Proyecto no encotrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -98,7 +95,7 @@ def add_user(proyect_id: str, pr_usuario: Usuarios):
         proy = container.read_item(item=proyect_id, partition_key=proyect_id)
 
         if any( p['id'] == pr_usuario.id for p in proy['id_usuario'] ):
-             raise HTTPException(status_code=400, detail='El usario con este Id ya esta inscrito')
+             raise HTTPException(status_code=400, detail='El usuario con este Id ya esta inscrito')
 
         proy['id_usuario'].append(pr_usuario.dict())
 
@@ -158,7 +155,7 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
             raise HTTPException(status_code=404, detail= "Usuario no encontrado")
         
         if user['id'] != updated_user.id :
-            raise HTTPException(status_code=404, detail= "el id enviado en la peticion debe ser igual al id del body")
+            raise HTTPException(status_code=404, detail= "El id enviado en la peticion debe ser igual al id del body")
 
         user.update(updated_user.dict(exclude_unset=True))
 
@@ -170,7 +167,7 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
         return user
 
     except exceptions.CosmosResourceNotFoundError:
-        raise HTTPException(status_code=404, detail='Proyecto no encotrado')
+        raise HTTPException(status_code=404, detail='Proyecto no encontrado')
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
