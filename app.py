@@ -13,7 +13,7 @@ app = FastAPI(title='API de Gestion Proyectos y Usuarios')
 def home():
     return "Hola Mundo proyecto"
 
-# Crear proyecto
+# Crear_proyecto
 
 @app.post("/proyects/", response_model=Proyectos, status_code=201)
 def create_proyect(proy: Proyectos):
@@ -25,7 +25,7 @@ def create_proyect(proy: Proyectos):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-# Obtener proyecto
+# Obtener_proyecto
 @app.get("/proyects/{proyect_id}", response_model=Proyectos)
 def get_proyect(proyect_id: str = Path(..., description="ID del proyecto a recuperar")):
     try:
@@ -37,7 +37,7 @@ def get_proyect(proyect_id: str = Path(..., description="ID del proyecto a recup
         raise HTTPException(status_code=400, detail=str(e))
     
 
-# Listar Proyectos
+# Listar_Proyectos
 
 @app.get("/proyects/", response_model=List[Proyectos])
 def list_proyect():
@@ -46,7 +46,7 @@ def list_proyect():
     items = list(container.query_items(query=query, enable_cross_partition_query=True))
     return items
 
-# Actualizar Proyectos
+# Actualizar_Proyectos
 
 @app.put("/proyects/{proyect_id}", response_model=Proyectos)
 def update_proyect(proyect_id: str, update_proyect: Proyectos):
@@ -68,7 +68,7 @@ def update_proyect(proyect_id: str, update_proyect: Proyectos):
         raise HTTPException(status_code=400, detail=str(e))
     
 
-# Eliminar proyecto
+# Eliminar_proyecto
 
 @app.delete("/proyects/{proyect_id}", status_code=204)
 def delete_proyect(proyect_id: str):
@@ -83,7 +83,7 @@ def delete_proyect(proyect_id: str):
 
 #### Endpoints de Usuarios
 
-#Crear_usuario
+# Crear_usuario
 
 @app.post("/proyects/{proyect_id}/users/", response_model=Usuarios, status_code=201)
 def add_user(proyect_id: str, pr_usuario: Usuarios):
@@ -107,7 +107,7 @@ def add_user(proyect_id: str, pr_usuario: Usuarios):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-#Obtener_usuario
+# Obtener_usuario
 
 @app.get("/proyects/{proyect_id}/users/{user_id}")
 def get_user(proyect_id: str, user_id: str):
@@ -126,7 +126,7 @@ def get_user(proyect_id: str, user_id: str):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-#Listar_usuario
+# Listar_usuario
 
 @app.get("/proyects/{proyect_id}/users/", response_model=List[Usuarios])
 def list_user(proyect_id: str):
@@ -142,7 +142,7 @@ def list_user(proyect_id: str):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-#Actualizar_usuario
+# Actualizar_usuario
 
 @app.put("/proyects/{proyect_id}/users/{user_id}", response_model=Usuarios)
 def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
@@ -171,7 +171,7 @@ def update_user(proyect_id: str, user_id: str, updated_user: Usuarios):
     except exceptions.CosmosHttpResponseError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
- #Eliminar_usuario 
+ # Eliminar_usuario 
 
 @app.delete("/proyects/{proyect_id}/users/{user_id}", status_code=204)
 def delete_user(proyect_id: str, user_id: str):
